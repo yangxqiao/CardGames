@@ -1,148 +1,259 @@
 import random
 
-my_card = {
-    'number': ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'],
-    'type': ['hearts', 'spades', 'diamonds', 'clubs'],
-    'value': [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11],
-}
 
-num_of_total_dealt_cards = 0
+SUITS = ['hearts', 'spades', 'diamonds', 'clubs']
+RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+
+INIT_NUM_CARD_IN_HAND = 2
+
+
+def generate_human_players(*names):
+    human_players = []
+    for name in names:
+        player = Human(name)
+        human_players.append(player)
+    return human_players
+
+
+def generate_robot_players(num_robot):
+    robot_players = []
+    for i in range(num_robot):
+        player = Robot(name="robot%s" % i)
+        robot_players.append(player)
+    return robot_players
+
+
+def make_deck(deck):
+    for suit in SUITS:
+        for rank in RANKS:
+            deck.add_cards(Card(suit, rank))
+
+
+def input_yes_or_no(question):
+    invalid_answer = True
+    while invalid_answer:
+
+        user_choice = input(question).lower()
+        if user_choice in ['y', 'yes', 'yup']:
+            return True
+
+        elif user_choice in ['n', 'no', 'nope']:
+            return False
+
+        else:
+            print("Please provide a valid answer.")
 
 
 class Card:
-    def __init__(self, total_num_of_cards, my_card):
-        self.total_num_of_cards = total_num_of_cards
-        self.my_card = my_card
+    def __init__(self, suit, rank, is_flip=False):
+        self.suit = suit
+        self.rank = rank
+        self.is_flip = is_flip
+
+    def flip(self):
+        self.is_flip = not self.is_flip
+
+    def __repr__(self):
+        return str(self.rank)
+
+
+class CardCollection:
+    def __init__(self):
         self.cards = []
 
-    def shuffle_cards(self):
-        for i in range(self.total_num_of_cards):
-            self.cards.append(i)
+    def _add_card(self, new_card):
+        self.cards.append(new_card)
+
+    def add_cards(self, *new_cards):
+        for card in new_cards:
+            self._add_card(card)
+
+    def pop_card(self):
+        try:
+            return self.cards.pop()
+        except IndexError:
+            print("This CardCollection is empty now.")
+
+    def flip_card(self, card_idx):
+        self.cards[card_idx].flip()
+
+    def shuffle(self):
         random.shuffle(self.cards)
 
+    def num_of_cards(self):
+        return len(self.cards)
 
-class Person:
-    def __init__(self, name, my_card):
+    def clear(self):
+        self.cards.clear()
+
+    def __getitem__(self, idx):
+        return self.cards[idx]
+
+    def __repr__(self):
+        return str(self.cards)
+
+
+class BlackJackPlayer:
+
+    def __init__(self, name):
         self.name = name
-        self.hand = []
-        self.my_card = my_card
+        self.hand = CardCollection()
 
-    def receive_card(self, *args):
-        for card_id in args:
-            self.hand.append(card_id)
+    @property
+    def points(self):
 
-    def get_num_card_in_hand(self):
-        return len(self.hand)
-
-    def print_card(self, card_id):
-        type_of_card = self.my_card['type'][card_id // 13]
-        num_on_card = self.my_card['number'][card_id % 13]
-        return "%s-%s " % (type_of_card, num_on_card)
-
-    def print_hand(self):
-        target_str = ""
-        for i in range(len(self.hand)):
-            target_str = target_str + self.print_card(self.hand[i]) + " "
-
-        return target_str
-
-    def get_card_value(self, card_id):
-        return self.my_card['value'][card_id % 13]
-
-    def get_best_score(self):
         num_of_aces = 0
         total_value = 0
-        # calculate the total scores with A counted as 11
-        for i in range(self.get_num_card_in_hand()):
-            total_value += self.get_card_value(self.hand[i])
-            if self.get_card_value(self.hand[i]) == 11:
+
+        # calculate the total scores with Ace counted as 11
+        for i in range(self.hand.num_of_cards()):
+            total_value += self._get_card_value_with_rank(i)
+            if self._get_card_value_with_rank(i) == 11:
                 num_of_aces += 1
-        # calculate for the best case
+
+        # find the highest score under 21 counting Aces as 1s
         for i in range(num_of_aces):
             if total_value > 21:
                 total_value -= 10
-
         return total_value
 
-keep_playing = True
-while keep_playing:
-    # initialize the card game
-    bj = Card(52, my_card)
-    bj.shuffle_cards()
+    def _get_card_value_with_rank(self, card_idx):
 
-    player = Person('Yang', my_card)
-    dealer = Person('Robots', my_card)
+        rank = self.hand[card_idx].rank
 
-    dealer.receive_card(bj.cards[1], bj.cards[3])
-    player.receive_card(bj.cards[0], bj.cards[2])
+        if rank == 'A':
+            return 11
+        elif rank in ['J', 'Q', 'K']:
+            return 10
+        else:
+            return int(rank)
 
-    num_of_total_dealt_cards = 4
+    def is_choose_to_hit(self):
+        raise NotImplementedError("This function is meant to be implemented in a subclass")
 
-    print("Dealer: ? %s" % dealer.print_card(dealer.hand[1]))
-    print("Player: %s" % player.print_hand())
+    def print_status(self):
+        print("%s's score is %s: %s" % (self.name, self.points, self.hand))
 
-    # determine player's initial status after getting two cards
-    if player.get_best_score() == 21:
-        player_status = 's'
-    else:
-        player_status = input("Type 'h' to hit and 's' to stay:\n")
+    def __repr__(self):
+        return str(self.hand)
 
-    # check for if player_status is correct
-    correct_input = True
-    if player_status != 's' and player_status != 'h':
-        correct_input = False
-        keep_playing = False
 
-    while correct_input:
+class Human(BlackJackPlayer):
 
-        if player_status == 's':
+    def __init__(self, name):
+        BlackJackPlayer.__init__(self, name)
 
-            while dealer.get_best_score() < 17:
-                dealer.receive_card(bj.cards[num_of_total_dealt_cards])
-                num_of_total_dealt_cards += 1
+    def is_choose_to_hit(self):
 
-            print("Dealer: %s" % dealer.print_hand())
-
-            if 17 <= dealer.get_best_score() <= 21:
-                if dealer.get_best_score() < player.get_best_score():
-                    print("Player won!")
-
-                elif dealer.get_best_score() > player.get_best_score():
-                    print("Dealer won!")
-
-                else:
-                    print("Tie!")
-
-            else:
-                print("The dealer bust!")
-
-            print("Player score: %s" % player.get_best_score())
-            print("Dealer score: %s" % dealer.get_best_score())
-
-            correct_input = False
-
-        elif player_status == 'h':
-            player.receive_card(bj.cards[num_of_total_dealt_cards])
-            num_of_total_dealt_cards += 1
-            print("Player: %s" % player.print_hand())
-
-            if player.get_best_score() < 21:
-                player_status = input("Type 'h' to hit and 's' to stay:\n")
-
-            elif player.get_best_score() == 21:
-                player_status = 's'
-
-            else:
-                print('The player bust!')
-                print("Player score: %s" % player.get_best_score())
-                print("Dealer score: %s" % dealer.get_best_score())
-
-                correct_input = False
+        if self.points > 21:
+            return False
 
         else:
-            correct_input = False
-            keep_playing = False
+            invalid_answer = True
 
-    play_again = input("Do you want to play again? [y/n]\n")
-    if play_again != 'y':
-        keep_playing = False
+            while invalid_answer:
+                player_decision = input("Hi, %s. Type 'h' to hit and 's' to stay:\n" % self.name).lower()
+                if player_decision == 'h':
+                    return True
+                elif player_decision == 's':
+                    return False
+                else:
+                    print("Please provide a valid answer.")
+
+
+class Robot(BlackJackPlayer):
+    def __init__(self, name):
+        BlackJackPlayer.__init__(self, name)
+
+    def is_choose_to_hit(self):
+        total_value = self.points
+        if total_value < 17:
+            return True
+
+        elif 17 <= total_value:
+            return False
+
+
+class BlackJackGame:
+    # pass in a list of players
+    # pass in one dealer
+    def __init__(self, dealer, players):
+        self._dealer = dealer
+        self._players = players
+        self._deck = CardCollection()
+
+    def num_of_players(self):
+        return 1 + len(self._players)
+
+    def _init_deck(self):
+        self._clear_deck()
+
+        if self.num_of_players() * 11 >= self._deck.num_of_cards():
+            num_of_deck = self.num_of_players() * 11 // 52 + 1
+
+            for _ in range(num_of_deck):
+                make_deck(self._deck)
+
+            self._deck.shuffle()
+
+    def _init_players_hand(self):
+        self._clear_hands()
+
+        for player in self._players:
+            for _ in range(INIT_NUM_CARD_IN_HAND):
+                player.hand.add_cards(self._deck.pop_card())
+
+        for _ in range(INIT_NUM_CARD_IN_HAND):
+            self._dealer.hand.add_cards(self._deck.pop_card())
+            self._dealer.hand.flip_card(0)
+
+    def _clear_hands(self):
+        for player in self._players + [self._dealer]:
+            player.hand.clear()
+
+    def _clear_deck(self):
+        self._deck.clear()
+
+    def _evaluate_results(self):
+
+        for player in self._players:
+            if ((self._dealer.points > 21 and player.points <= 21)
+                    or (self._dealer.points < player.points <= 21)):
+                print("%s won with score %s" % (player.name, player.points))
+
+            else:
+                print("%s lost with score %s" % (player.name, player.points))
+
+    def _do_turn(self, player):
+
+        player.print_status()
+
+        while player.is_choose_to_hit():
+            player.hand.add_cards(self._deck.pop_card())
+            player.print_status()
+
+    def run(self):
+
+        keep_playing = True
+        while keep_playing:
+
+            self._init_deck()
+            self._init_players_hand()
+
+            for player in self._players + [self._dealer]:
+                self._do_turn(player)
+
+            self._evaluate_results()
+
+            keep_playing = input_yes_or_no("Do you want to keep playing?\n")
+
+
+if __name__ == '__main__':
+
+    dealer = Robot("Dealer")
+    human_player = generate_human_players('Yang', 'Kat')
+    robot_player = generate_robot_players(20)
+    players = human_player + robot_player
+
+    lets_play_game = BlackJackGame(dealer, players)
+    lets_play_game.run()
