@@ -33,15 +33,25 @@ def input_yes_or_no(question):
     invalid_answer = True
     while invalid_answer:
 
-        user_choice = input(question).lower()
-        if user_choice in ['y', 'yes', 'yup']:
-            return True
+        user_choice = input(question)
 
-        elif user_choice in ['n', 'no', 'nope']:
-            return False
-
-        else:
+        try:
+            return is_yes_or_no(user_choice)
+        except ValueError:
             print("Please provide a valid answer.")
+
+
+def is_yes_or_no(text):
+
+    text = text.lower()
+    if text in ['y', 'yes', 'yup']:
+        return True
+
+    elif text in ['n', 'no', 'nope']:
+        return False
+
+    else:
+        raise ValueError("The string cannot parse yes or no")
 
 
 class Card:
@@ -71,20 +81,29 @@ class CardCollection:
         self.cards = []
 
     def _add_card(self, new_card):
+        if not isinstance(new_card, Card):
+            raise TypeError
+
         self.cards.append(new_card)
 
     def add_cards(self, *new_cards):
+        # if type(*new_cards) is not tuple:
+        #     raise TypeError
+
         for card in new_cards:
             self._add_card(card)
 
     def pop_card(self):
-        try:
-            return self.cards.pop()
-        except IndexError:
-            print("This CardCollection is empty now.")
+        if self.cards == []:
+            raise IndexError("This CardCollection is empty now.")
+        return self.cards.pop()
 
     def flip_card(self, card_idx):
-        self.cards[card_idx].flip()
+        if type(card_idx) is int and 0 <= card_idx < self.num_of_cards():
+            self.cards[card_idx].flip()
+
+        else:
+            raise IndexError
 
     def shuffle(self):
         random.shuffle(self.cards)

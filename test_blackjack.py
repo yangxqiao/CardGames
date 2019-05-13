@@ -1,6 +1,6 @@
 import unittest
-
-from _card_games.blackjack import Card
+import random
+from _card_games.blackjack import Card, CardCollection, make_deck
 
 SUITS = ['hearts', 'spades', 'diamonds', 'clubs']
 RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -50,17 +50,83 @@ class TestCard(unittest.TestCase):
 
 class TestCardCollection(unittest.TestCase):
 
-    """
-    test_valid_input_add_card
-    test_invalid_input_add_card
-    test_valid_input_add_cards
-    test_invalid_input_add_cards
-    test_pop_card_nonempty
-    test_shuffle_change_order
+    def test_valid_input_add_card(self):
+        deck = CardCollection()
+        card1 = Card('hearts', '10')
+        card2 = Card('spades', '9')
 
-    """
+        for card in [card1, card2]:
+            deck._add_card(card)
+
+    def test_invalid_input_add_card(self):
+        deck = CardCollection()
+        card1 = 5
+        card2 = 'ABC'
+        card3 = ['hearts', 10]
+        card4 = ['hearts', '10']
+
+        for card in [card1, card2, card3, card4, None, []]:
+            self.assertRaises(TypeError, deck._add_card, card)
+
+    def test_valid_input_add_cards(self):
+        deck = CardCollection()
+        card1 = Card('hearts', '10')
+        card2 = Card('spades', '9')
+        card3 = Card('clubs', 'K')
+        card4 = Card('diamonds', 'A')
+
+        deck.add_cards(card1, card2, card3, card4)
+
+    def test_invalid_input_add_cards(self):
+        # card1 = Card('hearts', '10')
+        # card2 = Card('spades', '9')
+        # card3 = Card('clubs', 'K')
+        # card4 = Card('diamonds', 'A')
+        #
+        # self.assertRaises(TypeError, CardCollection.add_cards,
+        #                   [card1, card2, card3, card4])
+        #
+        # self.assertRaises(TypeError, CardCollection.add_cards,
+        #                   {card1: card2, card3: card4})
+        pass
+
+    def test_pop_card_nonempty(self):
+        deck = CardCollection()
+        card1 = Card('hearts', '10')
+        card2 = Card('spades', '9')
+
+        deck.add_cards(card1)
+        self.assertEqual(deck.cards, [card1])
+        deck.pop_card()
+        self.assertEqual(deck.cards, [])
+
+        deck.add_cards(card1, card2)
+        self.assertEqual(deck.cards, [card1, card2])
+        deck.pop_card()
+        self.assertEqual(deck.cards, [card1])
+        deck.pop_card()
+        self.assertEqual(deck.cards, [])
+
+    def test_pop_card_empty(self):
+        deck = CardCollection()
+        self.assertRaises(IndexError, CardCollection.pop_card, deck)
+
+    def test_flip_card(self):
+        deck = CardCollection()
+        make_deck(deck)
+
+        for num in [-1, '2', 56, [100], None, []]:
+            self.assertRaises(IndexError, deck.flip_card, num)
+
+    def shuffle_change_order(self):
+        deck = CardCollection()
+        make_deck(deck)
+        prev_cards = deck.cards
+
+        for _ in range(10):
+            deck.shuffle()
+        self.assertNotEqual(deck.cards, prev_cards)
 
 
 if __name__ == '__main__':
     unittest.main()
-
