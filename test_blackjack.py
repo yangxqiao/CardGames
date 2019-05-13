@@ -1,5 +1,5 @@
 import unittest
-from _card_games.blackjack import Card, CardCollection, make_deck, BlackJackPlayer
+from _card_games.blackjack import Card, CardCollection, make_deck, BlackJackPlayer, is_yes_or_no
 
 SUITS = ['hearts', 'spades', 'diamonds', 'clubs']
 RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -163,6 +163,23 @@ class TestBlackJackPlayer(unittest.TestCase):
     def test_is_choose_to_hit(self):
         yang = BlackJackPlayer('Yang')
         self.assertRaises(NotImplementedError, yang.is_choose_to_hit)
+
+
+class TestYesOrNo(unittest.TestCase):
+
+    def test_valid_is_yes_or_no(self):
+        for text in ['yes', 'YES']:
+            self.assertEqual(is_yes_or_no(text), True)
+
+        for text in ['no', 'NO']:
+            self.assertEqual(is_yes_or_no(text), False)
+
+    def test_invalid_is_yes_or_no(self):
+        for text in [1, 2, 3, [], None]:
+            self.assertRaises(TypeError, is_yes_or_no, text)
+
+        for text in ['definitely', 'lol yes', 'No no no']:
+            self.assertRaises(ValueError, is_yes_or_no, text)
 
 
 if __name__ == '__main__':

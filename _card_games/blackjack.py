@@ -42,6 +42,8 @@ def input_yes_or_no(question):
 
 
 def is_yes_or_no(text):
+    if not isinstance(text, str):
+        raise TypeError
 
     text = text.lower()
     if text in ['y', 'yes', 'yup']:
@@ -175,16 +177,7 @@ class Human(BlackJackPlayer):
             return False
 
         else:
-            invalid_answer = True
-
-            while invalid_answer:
-                player_decision = input("Hi, %s. Type 'h' to hit and 's' to stay:\n" % self.name).lower()
-                if player_decision == 'h':
-                    return True
-                elif player_decision == 's':
-                    return False
-                else:
-                    print("Please provide a valid answer.")
+            return input_yes_or_no("Do you want to hit?\n")
 
 
 class Robot(BlackJackPlayer):
