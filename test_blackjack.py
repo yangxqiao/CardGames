@@ -1,5 +1,6 @@
 import unittest
-from _card_games.blackjack import Card, CardCollection, make_deck, BlackJackPlayer, is_yes_or_no
+from _card_games.blackjack import Card, CardCollection, make_deck, \
+    BlackJackPlayer, is_yes_or_no, Robot
 
 SUITS = ['hearts', 'spades', 'diamonds', 'clubs']
 RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -180,6 +181,19 @@ class TestYesOrNo(unittest.TestCase):
 
         for text in ['definitely', 'lol yes', 'No no no']:
             self.assertRaises(ValueError, is_yes_or_no, text)
+
+
+class TestRobot(unittest.TestCase):
+
+    def test_is_choose_to_hit(self):
+        card1 = Card('hearts', 'A')
+        robot1 = Robot('K7')
+
+        robot1.hand.add_cards(*[card1] * 16)
+        self.assertEqual(robot1.is_choose_to_hit(), True)
+
+        robot1.hand.add_cards(card1)
+        self.assertEqual(robot1.is_choose_to_hit(), False)
 
 
 if __name__ == '__main__':
