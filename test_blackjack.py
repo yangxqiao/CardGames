@@ -145,7 +145,20 @@ class TestBlackJackPlayer(unittest.TestCase):
             self.assertRaises(ValueError, BlackJackPlayer, name)
 
     def test_points_property(self):
-        pass
+        card1 = Card('hearts', 'A')
+        card2 = Card('spades', 'K')
+
+        player1 = BlackJackPlayer('Yang')
+        player1.hand.add_cards(*[card1] * 22)
+        self.assertEqual(player1.points, 22)
+
+        player2 = BlackJackPlayer('Yang')
+        player2.hand.add_cards(*[card2] * 2, card1)
+        self.assertEqual(player2.points, 21)
+
+        player3 = BlackJackPlayer('Yang')
+        make_deck(player3.hand)
+        self.assertEqual(player3.points, 340)
 
     def test_is_choose_to_hit(self):
         yang = BlackJackPlayer('Yang')

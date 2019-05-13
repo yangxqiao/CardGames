@@ -134,9 +134,9 @@ class BlackJackPlayer:
         total_value = 0
 
         # calculate the total scores with Ace counted as 11
-        for i in range(self.hand.num_of_cards()):
-            total_value += self._get_card_value_with_rank(i)
-            if self._get_card_value_with_rank(i) == 11:
+        for card in self.hand:
+            total_value += self._get_card_value_with_rank(card)
+            if self._get_card_value_with_rank(card) == 11:
                 num_of_aces += 1
 
         # find the highest score under 21 counting Aces as 1s
@@ -145,16 +145,14 @@ class BlackJackPlayer:
                 total_value -= 10
         return total_value
 
-    def _get_card_value_with_rank(self, card_idx):
+    def _get_card_value_with_rank(self, card):
 
-        rank = self.hand[card_idx].rank
-
-        if rank == 'A':
+        if card.rank == 'A':
             return 11
-        elif rank in ['J', 'Q', 'K']:
+        elif card.rank in ['J', 'Q', 'K']:
             return 10
         else:
-            return int(rank)
+            return int(card.rank)
 
     def is_choose_to_hit(self):
         raise NotImplementedError("This function is meant to be implemented in a subclass")
