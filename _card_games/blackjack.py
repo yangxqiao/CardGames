@@ -87,9 +87,6 @@ class CardCollection:
         self.cards.append(new_card)
 
     def add_cards(self, *new_cards):
-        # if type(*new_cards) is not tuple:
-        #     raise TypeError
-
         for card in new_cards:
             self._add_card(card)
 
@@ -124,6 +121,9 @@ class CardCollection:
 class BlackJackPlayer:
 
     def __init__(self, name):
+        if not isinstance(name, str):
+            raise ValueError
+
         self.name = name
         self.hand = CardCollection()
 

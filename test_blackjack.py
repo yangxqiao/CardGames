@@ -1,6 +1,5 @@
 import unittest
-import random
-from _card_games.blackjack import Card, CardCollection, make_deck
+from _card_games.blackjack import Card, CardCollection, make_deck, BlackJackPlayer
 
 SUITS = ['hearts', 'spades', 'diamonds', 'clubs']
 RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -55,8 +54,10 @@ class TestCardCollection(unittest.TestCase):
         card1 = Card('hearts', '10')
         card2 = Card('spades', '9')
 
-        for card in [card1, card2]:
-            deck._add_card(card)
+        deck._add_card(card1)
+        self.assertEqual(deck.cards, [card1])
+        deck._add_card(card2)
+        self.assertEqual(deck.cards, [card1, card2])
 
     def test_invalid_input_add_card(self):
         deck = CardCollection()
@@ -78,17 +79,16 @@ class TestCardCollection(unittest.TestCase):
         deck.add_cards(card1, card2, card3, card4)
 
     def test_invalid_input_add_cards(self):
-        # card1 = Card('hearts', '10')
-        # card2 = Card('spades', '9')
-        # card3 = Card('clubs', 'K')
-        # card4 = Card('diamonds', 'A')
-        #
-        # self.assertRaises(TypeError, CardCollection.add_cards,
-        #                   [card1, card2, card3, card4])
-        #
-        # self.assertRaises(TypeError, CardCollection.add_cards,
-        #                   {card1: card2, card3: card4})
-        pass
+        deck = CardCollection()
+        card1 = Card('hearts', '10')
+        card2 = Card('spades', '9')
+        card3 = Card('clubs', 'K')
+
+        deck.add_cards(card1, card2)
+        self.assertEqual(deck.num_of_cards(), 2)
+
+        deck.add_cards(*[card3] * 100)
+        self.assertEqual(deck.num_of_cards(), 102)
 
     def test_pop_card_nonempty(self):
         deck = CardCollection()
@@ -118,14 +118,38 @@ class TestCardCollection(unittest.TestCase):
         for num in [-1, '2', 56, [100], None, []]:
             self.assertRaises(IndexError, deck.flip_card, num)
 
-    def shuffle_change_order(self):
+    def test_shuffle_change_order(self):
         deck = CardCollection()
         make_deck(deck)
-        prev_cards = deck.cards
+        prev_cards = deck.cards.copy()
 
-        for _ in range(10):
-            deck.shuffle()
+        deck.shuffle()
         self.assertNotEqual(deck.cards, prev_cards)
+
+    def test_clear_clean_list(self):
+        deck = CardCollection()
+        make_deck(deck)
+
+        deck.clear()
+        self.assertEqual(deck.cards, [])
+
+
+class TestBlackJackPlayer(unittest.TestCase):
+
+    def test_valid_player_name_no_exception(self):
+        for name in ['123', 'yan123', 'ABC', '[A]', 'None']:
+            BlackJackPlayer(name)
+
+    def test_invalid_player_name_raise_exception(self):
+        for name in [[], None, 23]:
+            self.assertRaises(ValueError, BlackJackPlayer, name)
+
+    def test_points_property(self):
+        pass
+
+    def test_is_choose_to_hit(self):
+        yang = BlackJackPlayer('Yang')
+        self.assertRaises(NotImplementedError, yang.is_choose_to_hit)
 
 
 if __name__ == '__main__':
