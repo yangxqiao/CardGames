@@ -45,13 +45,22 @@ def input_yes_or_no(question):
 
 
 class Card:
-    def __init__(self, suit, rank, is_flip=False):
+    def __init__(self, suit, rank, is_face_up=False):
+        if suit not in SUITS:
+            raise ValueError
+
+        if rank not in RANKS:
+            raise ValueError
+
+        if is_face_up not in [False, True]:
+            raise ValueError
+
         self.suit = suit
         self.rank = rank
-        self.is_flip = is_flip
+        self.is_face_up = is_face_up
 
     def flip(self):
-        self.is_flip = not self.is_flip
+        self.is_face_up = not self.is_face_up
 
     def __repr__(self):
         return str(self.rank)
