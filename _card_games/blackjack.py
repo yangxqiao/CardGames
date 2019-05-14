@@ -29,7 +29,7 @@ def generate_robot_players(num_robot):
 def make_deck(deck):
     for suit in SUITS:
         for rank in RANKS:
-            deck.add_cards(Card(suit, rank))
+            deck.append(Card(suit, rank))
 
 
 def input_yes_or_no(question):
@@ -216,13 +216,11 @@ class BlackJackGame:
     def _init_deck(self):
         self._clear_deck()
 
-        if self.num_of_players() * 11 >= self._deck.num_of_cards():
-            num_of_deck = self.num_of_players() * 11 // 52 + 1
+        num_of_deck = 1 + (self.num_of_players() * 11) // 52
+        for _ in range(num_of_deck):
+            make_deck(self._deck.cards)
 
-            for _ in range(num_of_deck):
-                make_deck(self._deck)
-
-            self._deck.shuffle()
+        self._deck.shuffle()
 
     def _init_players_hand(self):
         self._clear_hands()
@@ -260,22 +258,23 @@ class BlackJackGame:
             player.hand.add_cards(self._deck.pop_card())
             player.print_status()
 
+    def _init(self):
+        self._init_deck()
+        self._init_players_hand()
+
+    def _play_all_turns(self):
+        for player in self._players + [self._dealer]:
+            self._do_turn(player)
+
     def run(self):
 
         keep_playing = True
         while keep_playing:
 
-            self._init_deck()
-            self._init_players_hand()
-
-            for player in self._players + [self._dealer]:
-                self._do_turn(player)
-
+            self._init()
+            self._play_all_turns()
             self._evaluate_results()
 
-            """
-            
-            """
             keep_playing = input_yes_or_no("Do you want to keep playing?\n")
 
 

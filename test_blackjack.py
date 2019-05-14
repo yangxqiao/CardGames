@@ -115,14 +115,14 @@ class TestCardCollection(unittest.TestCase):
 
     def test_flip_card(self):
         deck = CardCollection()
-        make_deck(deck)
+        make_deck(deck.cards)
 
         for num in [-1, '2', 56, [100], None, []]:
             self.assertRaises(IndexError, deck.flip_card, num)
 
     def test_shuffle_change_order(self):
         deck = CardCollection()
-        make_deck(deck)
+        make_deck(deck.cards)
         prev_cards = deck.cards.copy()
 
         deck.shuffle()
@@ -130,7 +130,7 @@ class TestCardCollection(unittest.TestCase):
 
     def test_clear_clean_list(self):
         deck = CardCollection()
-        make_deck(deck)
+        make_deck(deck.cards)
 
         deck.clear()
         self.assertEqual(deck.cards, [])
@@ -160,7 +160,7 @@ class TestBlackJackPlayer(unittest.TestCase):
         self.assertEqual(player2.points, 21)
 
         player3 = BlackJackPlayer('Yang')
-        make_deck(player3.hand)
+        make_deck(player3.hand.cards)
         self.assertEqual(player3.points, 340)
 
         player4 = BlackJackPlayer('Yang')
@@ -236,7 +236,29 @@ class TestBlackJackGame(unittest.TestCase):
         self.assertRaises(TypeError, BlackJackGame, dealer1, player1, player2)
 
     def test_valid_output_num_of_players(self):
-        pass
+        dealer = Robot('J2')
+
+        robot_players = generate_robot_players(10)
+        game = BlackJackGame(dealer, robot_players)
+        self.assertEqual(game.num_of_players(), 11)
+
+        robot_players = generate_robot_players(100)
+        game = BlackJackGame(dealer, robot_players)
+        self.assertEqual(game.num_of_players(), 101)
+
+    def test_game_runs_correctly(self):
+        dealer = Robot('J2')
+        robot_players = generate_robot_players(100)
+        game = BlackJackGame(dealer, robot_players)
+
+        for _ in range(10):
+            game._init()
+            self.assertEqual(game._deck.num_of_cards(), 942)
+            for player in robot_players + [dealer]:
+                self.assertEqual(player.hand.num_of_cards(), 2)
+
+            game._play_all_turns()
+            game._evaluate_results()
 
 
 if __name__ == '__main__':
