@@ -252,8 +252,10 @@ class TestBlackJackGame(unittest.TestCase):
         game = BlackJackGame(dealer, robot_players)
 
         for _ in range(10):
-            game._init()
-            self.assertEqual(game._deck.num_of_cards(), 942)
+            game._init_deck()
+            self.assertEqual(game._deck.num_of_cards(), 1144)
+
+            game._init_players_hand()
             for player in robot_players + [dealer]:
                 self.assertEqual(player.hand.num_of_cards(), 2)
 

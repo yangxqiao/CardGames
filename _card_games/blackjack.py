@@ -258,10 +258,6 @@ class BlackJackGame:
             player.hand.add_cards(self._deck.pop_card())
             player.print_status()
 
-    def _init(self):
-        self._init_deck()
-        self._init_players_hand()
-
     def _play_all_turns(self):
         for player in self._players + [self._dealer]:
             self._do_turn(player)
@@ -271,7 +267,8 @@ class BlackJackGame:
         keep_playing = True
         while keep_playing:
 
-            self._init()
+            self._init_deck()
+            self._init_players_hand()
             self._play_all_turns()
             self._evaluate_results()
 
