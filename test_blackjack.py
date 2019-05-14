@@ -1,7 +1,7 @@
 import unittest
 from _card_games.blackjack import Card, CardCollection, make_deck, \
     BlackJackPlayer, is_yes_or_no, Robot, Human, BlackJackGame, \
-    generate_robot_players, generate_human_players
+    generate_robot_players
 
 SUITS = ['hearts', 'spades', 'diamonds', 'clubs']
 RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -149,6 +149,7 @@ class TestBlackJackPlayer(unittest.TestCase):
     def test_points_property(self):
         card1 = Card('hearts', 'A')
         card2 = Card('spades', 'K')
+        card3 = Card('clubs', '2')
 
         player1 = BlackJackPlayer('Yang')
         player1.hand.add_cards(*[card1] * 22)
@@ -162,9 +163,9 @@ class TestBlackJackPlayer(unittest.TestCase):
         make_deck(player3.hand)
         self.assertEqual(player3.points, 340)
 
-        """
-        not extreme cases
-        """
+        player4 = BlackJackPlayer('Yang')
+        player4.hand.add_cards(card2, card3)
+        self.assertEqual(player4.points, 12)
 
     def test_is_choose_to_hit(self):
         yang = BlackJackPlayer('Yang')
@@ -184,63 +185,55 @@ class TestYesOrNo(unittest.TestCase):
         for text in [1, 2, 3, [], None]:
             self.assertRaises(TypeError, is_yes_or_no, text)
 
-        for text in ['definitely', 'lol yes', 'No no no']:
+        for text in ['Definitely!', 'lol yes', 'No no no']:
             self.assertRaises(ValueError, is_yes_or_no, text)
 
 
 class TestRobot(unittest.TestCase):
 
     def test_is_choose_to_hit(self):
-        card1 = Card('hearts', 'A')
-        robot1 = Robot('K7')
+        cards = []
 
-        robot1.hand.add_cards(*[card1] * 16)
-        self.assertEqual(robot1.is_choose_to_hit(), True)
+        for i in range(13):
+            cards.append(Card('hearts', RANKS[i]))
 
-        robot1.hand.add_cards(card1)
-        self.assertEqual(robot1.is_choose_to_hit(), False)
+        # test points from 2 to 11
+        for card in cards:
+            robot = Robot('K7')
+            robot.hand.add_cards(card)
+            self.assertEqual(robot.is_choose_to_hit(), True)
 
-        """
-            test with all the cases e.g. 1, 2, ... 21
-        """
+        # test points from 12 to 16
+        for card in cards[:5]:
+            robot = Robot('K7')
+            robot.hand.add_cards(card, cards[8])
+            self.assertEqual(robot.is_choose_to_hit(), True)
+
+        # test points from 17 to 21
+        for card in cards[5:]:
+            robot = Robot('K7')
+            robot.hand.add_cards(card, cards[8])
+            self.assertEqual(robot.is_choose_to_hit(), False)
 
 
 class TestBlackJackGame(unittest.TestCase):
-    """
-        test_invalid_player
-        test_valid_output_num_of_players
-    """
 
-    def test_valid_dealer(self):
+    def test_valid_dealer_player_input(self):
         dealer1 = Robot('J2')
-        human_players = generate_human_players('Yang', 'Kat')
+        robot_players = generate_robot_players(20)
+        BlackJackGame(dealer1, robot_players)
 
-        BlackJackGame(dealer1, human_players)
+    def test_invalid_dealer_input(self):
+        dealers = generate_robot_players(5)
+        robot_players = generate_robot_players(2)
+        self.assertRaises(TypeError, BlackJackGame, dealers, robot_players)
 
-    def test_invalid_dealer(self):
-        dealers1 = generate_robot_players(5)
-        human_players = generate_human_players('Yang', 'Kat')
-        self.assertRaises(TypeError, BlackJackGame, dealers1, human_players)
-
-        dealers2 = generate_human_players('Yang', 'Kat')
-        robot_players = generate_robot_players(5)
-        self.assertRaises(TypeError, BlackJackGame, dealers2, robot_players)
-
-    def test_valid_player(self):
+    def test_invalid_player_input(self):
         dealer1 = Robot('J2')
-        human_players = generate_human_players('Yang', 'Kat')
-        robot_player = generate_robot_players(20)
-        players = human_players + robot_player
-
-        BlackJackGame(dealer1, players)
-
-    def test_invalid_player(self):
-        dealer1 = Robot('J2')
-        player1 = Human('Yang')
-        player2 = Human('Kat')
+        player1 = Robot('K2')
+        player2 = Robot('G3')
 
         self.assertRaises(TypeError, BlackJackGame, dealer1, player1, player2)
-        # self.assertRaises(TypeError, BlackJackGame, dealer1, (player1, player2))
 
     def test_valid_output_num_of_players(self):
         pass
