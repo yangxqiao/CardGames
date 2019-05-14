@@ -16,6 +16,9 @@ def generate_human_players(*names):
 
 
 def generate_robot_players(num_robot):
+    if type(num_robot) is not int:
+        raise TypeError
+
     robot_players = []
     for i in range(num_robot):
         player = Robot(name="robot%s" % i)
@@ -197,6 +200,12 @@ class BlackJackGame:
     # pass in a list of players
     # pass in one dealer
     def __init__(self, dealer, players):
+        if not (isinstance(dealer, Human) or isinstance(dealer, Robot)):
+            raise TypeError
+
+        if type(players) not in [list, tuple]:
+            raise TypeError
+
         self._dealer = dealer
         self._players = players
         self._deck = CardCollection()
@@ -264,15 +273,18 @@ class BlackJackGame:
 
             self._evaluate_results()
 
+            """
+            
+            """
             keep_playing = input_yes_or_no("Do you want to keep playing?\n")
 
 
 if __name__ == '__main__':
 
     dealer = Robot("Dealer")
-    human_player = generate_human_players('Yang', 'Kat')
-    robot_player = generate_robot_players(20)
-    players = human_player + robot_player
+    human_players = generate_human_players('Yang', 'Kat')
+    robot_players = generate_robot_players(20)
+    players = human_players + robot_players
 
     lets_play_game = BlackJackGame(dealer, players)
     lets_play_game.run()
